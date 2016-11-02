@@ -59,7 +59,25 @@
     (when (> (- *doc-cursor-offset* *doc-view-offset*) *doc-view-height*)
       (doc-scroll-down))
     (app-repaint)))
-    
+
+(defun doc-cursor-left ()
+  (buffer-cursor-left))
+
+(defun doc-cursor-right ()
+  (buffer-cursor-right))
+
+(defun doc-backspace ()
+  (buffer-backspace)
+  (doc-update-line *buffer-doc-pos* *buffer-line*)
+  (app-repaint))
+
+(defun doc-text (text)
+  (buffer-append text)
+  (doc-update-line *buffer-doc-pos* *buffer-line*)
+  (app-repaint))
+
+(defun doc-return ()
+  (buffer-return))
 
 (defun doc-draw ()
   

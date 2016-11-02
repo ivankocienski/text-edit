@@ -18,12 +18,11 @@
     (when (> newlen -1)
       (setf *buffer-line* (subseq *buffer-line* 0 newlen)
 	    *buffer-cursor-pos* (1- *buffer-cursor-pos*))
-      (doc-update-line *buffer-doc-pos* *buffer-line*)
-      (app-repaint))))
+      )))
 
 (defun buffer-cursor-left ()
   (format t "buffer-cursor-left~%")
-  (when (> *bufer-cursor-pos* 0)
+  (when (> *buffer-cursor-pos* 0)
     (setf *buffer-cursor-pos* (1- *buffer-cursor-pos*))
     (app-repaint)))
 
@@ -33,20 +32,19 @@
     (setf *buffer-cursor-pos* (1+ *buffer-cursor-pos*))
     (app-repaint)))
 
-(defun buffer-newline ()
+(defun buffer-return ()
   (format t "newline~%")
   )
 
 (defun buffer-append (thing)
   (format t "buffer-append~%")
-  (when (> thing 0)
+  (when (> (length thing) 0)
       (let ((pre-cursor (subseq *buffer-line* 0 *buffer-cursor-pos*))
 	    (post-cursor (subseq *buffer-line* *buffer-cursor-pos* (length *buffer-line*))))
 	
-	(setf *buffer-line* (format nil "~a~a~a" pre-cursor (code-char thing) post-cursor)
+	(setf *buffer-line* (format nil "~a~a~a" pre-cursor thing post-cursor)
 	      *buffer-cursor-pos* (1+ *buffer-cursor-pos*)))
-      (doc-update-line *buffer-doc-pos* *buffer-line*)
-      (app-repaint)))
+      ))
 
 ;;(defun buffer-draw ()
 ;;  (font-draw-string 10 10 (format nil "~a" *line-buffer*))

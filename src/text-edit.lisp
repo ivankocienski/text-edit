@@ -20,6 +20,17 @@
     (:sdl-key-down      (doc-cursor-down))
     (t (buffer-append unicode))))
 
+(defmacro on-key-do ((key-var) &body forms)
+  (let* ((key-value-var (gensym "key-value-var"))
+	 (cond-forms (loop for def in forms
+			collect (let ((scancode (first def))		     
+				      (then-run (rest def)))
+				  `((sdl2:scancode= ,key-value-var ,scancode)
+				    (progn ,@then-run))))))
+
+    `(let ((,key-value-var (sdl2:scancode-value ,key-var)))
+       (cond ,@cond-forms))))
+
 (defun main ()
   "entry point. run this."
 
@@ -48,13 +59,20 @@
 
 	(let ((last-time (sdl2:get-ticks)))
 	  (sdl2:with-event-loop (:method :poll)
-	    (:textinput (:text text)
-			(log-wr :debug "text='~a'" text)
+	    (:textinput (:text code-point)
+			;;(log-wr :debug "text='~a'" text)
+			(doc-text (string (code-char code-point)))
 			)
 	    
-	    ;;(:keydown (:keysym sym)
-	    ;;	    (format t "keydown sym=~d~%" sym)
-	    ;;	    )
+	    (:keydown (:keysym sym)
+		      ;;(log-wr "keydown sym=~d" sym)
+		      (on-key-do (sym)
+			(:scancode-left      (doc-cursor-left))
+			(:scancode-right     (doc-cursor-right))
+			(:scancode-down      (doc-cursor-down))
+			(:scancode-up        (doc-cursor-up))
+			(:scancode-backspace (doc-backspace))
+			(:scancode-return    (doc-return))))
 	    
 	    (:quit ()
 		   t)
