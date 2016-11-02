@@ -1,24 +1,33 @@
 (in-package :text-edit)
 
-(defparameter *cursor-width* 8)
-(defparameter *cursor-height* 8)
+(defparameter *cursor-width* 9)
+(defparameter *cursor-height* 16)
+(defparameter *cursor-x* 0)
+(defparameter *cursor-y* 0)
+(defparameter *cursor-on* nil)
+(defparameter *cursor-renderer* nil)
 
-;; TODO- make blinky
+(defun cursor-set-pos (x y)
+  (setf *cursor-x* x
+	*cursor-y* y))
 
-(defun cursor-draw-block (px py)
-  (gl:disable :texture-2d)
-  (gl:color 1 1 1)
+(defun cursor-init (renderer)
+  (setf *cursor-renderer* renderer)
+  (cursor-set-pos 0 0)
+  (with-timer (:cursor-blink 0.5)
+    (setf *cursor-on* (not *cursor-on*))
+    (app-repaint)))
 
-  (let* ((px1 (* px  *cursor-width*))
-	 (py1 (* py  *cursor-height*))
-	 (px2 (+ px1 *cursor-width*))
-	 (py2 (+ py1 *cursor-height*)))
-	
-    (gl:with-primitives :quads
-      (gl:vertex px1 py1)
-      (gl:vertex px2 py1)
-      (gl:vertex px2 py2)
-      (gl:vertex px1 py2)))
+(defun cursor-draw ()
+  (when *cursor-on*
+    (let ((rect (sdl2:make-rect (* *cursor-x* *cursor-width*)
+				(* *cursor-y* *cursor-height*)
+				*cursor-width*
+				*cursor-height*)))
 
-      
-  (gl:enable :texture-2d))
+      (sdl2:set-render-draw-color *cursor-renderer*
+				  255
+				  255
+				  255
+				  255)
+      (sdl2:render-fill-rect *cursor-renderer* rect))))

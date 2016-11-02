@@ -8,6 +8,7 @@
 	       (:file "src/log")
 	       (:file "src/font")
 	       (:file "src/repaint")
+	       (:file "src/timer")
 	       ;;(:file "src/cursor")
 	       ;;(:file "src/buffer")
 	       ;;(:file "src/document")

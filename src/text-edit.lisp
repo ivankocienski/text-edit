@@ -35,46 +35,56 @@
 
 
       (sdl2:with-renderer (renderer window)
-
+	
+	(timer-reset-all)
 	(font-init renderer)
+	(cursor-init renderer)
+	
 	(app-repaint)
 	(log-wr :info "entering main loop")
-	
-	(sdl2:with-event-loop (:method :poll)
-	  (:textinput (:text text)
-	  	      (log-wr :debug "text='~a'" text)
-	  	      )
-	  
-	  ;;(:keydown (:keysym sym)
-	;;	    (format t "keydown sym=~d~%" sym)
-	;;	    )
-	  
-	  (:quit ()
-		 t)
-	  
-	  (:idle ()
-		 (app-when-repaint ()
-		   (paint)
-		   (sdl2:render-clear renderer)
-		   (sdl2:set-render-draw-color renderer 100 100 100 255)
-		   (sdl2:render-fill-rect renderer (sdl2:make-rect 10
-								   10
-								   100
-								   120))
 
-		   (sdl2:set-render-draw-color renderer 255 255 255 255)
-
-		   (font-color 255 0 0)
-		   (font-draw-string 80 20 "Hello, World!")
+	(let ((last-time (sdl2:get-ticks)))
+	  (sdl2:with-event-loop (:method :poll)
+	    (:textinput (:text text)
+			(log-wr :debug "text='~a'" text)
+			)
+	    
+	    ;;(:keydown (:keysym sym)
+	    ;;	    (format t "keydown sym=~d~%" sym)
+	    ;;	    )
+	    
+	    (:quit ()
+		   t)
+	    
+	    (:idle ()
+		   (let ((time-now (sdl2:get-ticks)))
+		     (timer-tick-all (* (- time-now last-time) 0.001))
+		     (setf last-time time-now))
 		   
-		   (font-color 0 255 0)
-		   (font-draw-string 80 40 "Hello, World!")
+		   (app-when-repaint ()
+		     (paint)
+		     (sdl2:set-render-draw-color renderer 0 0 0 255)
+		     (sdl2:render-clear renderer)
+		     (sdl2:set-render-draw-color renderer 100 100 100 255)
+		     (sdl2:render-fill-rect renderer (sdl2:make-rect 10
+								     10
+								     100
+								     120))
 
-		   (font-color 0 0 255)
-		   (font-draw-string 80 60 "Hello, World!")
+		     (sdl2:set-render-draw-color renderer 255 255 255 255)
 
-		   (sdl2:render-present renderer)))
-	  
-	  )))))
+		     (font-color 255 0 0)
+		     (font-draw-string 80 20 "Hello, World!")
+		     
+		     (font-color 0 255 0)
+		     (font-draw-string 80 40 "Hello, World!")
+
+		     (font-color 0 0 255)
+		     (font-draw-string 80 60 "Hello, World!")
+
+		     (cursor-draw)
+		     (sdl2:render-present renderer)))
+	    
+	    ))))))
 
 ;; (sdl2:quit)
