@@ -35,6 +35,9 @@
 
 
       (sdl2:with-renderer (renderer window)
+
+	(doc-init)
+	(doc-load (asdf:system-relative-pathname 'text-edit "data/palwarp.c"))
 	
 	(timer-reset-all)
 	(font-init renderer)
@@ -62,25 +65,13 @@
 		     (setf last-time time-now))
 		   
 		   (app-when-repaint ()
-		     (paint)
+		     ;;(paint)
 		     (sdl2:set-render-draw-color renderer 0 0 0 255)
 		     (sdl2:render-clear renderer)
-		     (sdl2:set-render-draw-color renderer 100 100 100 255)
-		     (sdl2:render-fill-rect renderer (sdl2:make-rect 10
-								     10
-								     100
-								     120))
-
-		     (sdl2:set-render-draw-color renderer 255 255 255 255)
-
-		     (font-color 255 0 0)
-		     (font-draw-string 80 20 "Hello, World!")
 		     
-		     (font-color 0 255 0)
-		     (font-draw-string 80 40 "Hello, World!")
-
-		     (font-color 0 0 255)
-		     (font-draw-string 80 60 "Hello, World!")
+		     (font-color 255 255 255)
+		     (sdl2:set-render-draw-color renderer 255 255 255 255)
+		     (doc-draw)
 
 		     (cursor-draw)
 		     (sdl2:render-present renderer)))

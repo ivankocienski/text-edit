@@ -9,8 +9,8 @@
 	       (:file "src/font")
 	       (:file "src/repaint")
 	       (:file "src/timer")
-	       ;;(:file "src/cursor")
-	       ;;(:file "src/buffer")
-	       ;;(:file "src/document")
+	       (:file "src/cursor")
+	       (:file "src/buffer")
+	       (:file "src/document")
 	       (:file "src/text-edit")))
 

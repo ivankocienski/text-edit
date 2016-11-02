@@ -16,19 +16,16 @@
 				     :callback callback
 				     :countdown 0))))
 				     
-    (setf *timer-db* (cons new-timer *timer-db*)))
-  )
+    (setf *timer-db* (cons new-timer *timer-db*))))
 
 (defmacro with-timer ((name period) &body body)
-  `(timer-start ,name ,period (lambda () ,@body))
-  )
+  `(timer-start ,name ,period (lambda () ,@body)))
 
 (defun timer-stop (stop-name)
   (setf *timer-db* (remove-if (lambda (timer)
 				(let ((name (car timer)))
 				  (eq stop-name name)))
-			      *timer-db*))
-  )
+			      *timer-db*)))
 
 (defun timer-tick-all (delta)
   (labels ((timer-update (db-timer)
@@ -43,5 +40,4 @@
 		   (decf (timer-countdown timer) delta))
 	       (cons name timer))))
     
-    (setf *timer-db* (mapcar #'timer-update *timer-db*)))
-  )
+    (setf *timer-db* (mapcar #'timer-update *timer-db*))))
