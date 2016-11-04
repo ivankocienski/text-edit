@@ -10,6 +10,10 @@
 (defun doc-init ()
   )
 
+(defun doc-update-cursor ()
+  (cursor-set-pos *buffer-cursor-pos*
+		  *doc-cursor-offset*))
+
 (defun doc-load (path)
   (log-wr :info "doc-load: path=~a" path)
   (with-open-file (read-file path)
@@ -21,8 +25,10 @@
       (setf *doc-lines* (read-line-to-doc))))
   (setf *doc-num-lines* (length *doc-lines*)
 	*doc-view-starts-at* *doc-lines*)
-  (buffer-setup (first *doc-lines*) 0)
+  (buffer-setup (first *doc-lines*))
+  (doc-update-cursor)
   (log-wr :info "lines=~d" (length *doc-lines*)))
+
 
 (defun doc-update-line (pos line)
   (setf (nth pos *doc-lines*) line))
@@ -45,9 +51,10 @@
   (format t "doc-cursor-up~%")
   (when (> *doc-cursor-offset* 0)
     (decf *doc-cursor-offset*)
-    (buffer-setup (nth *doc-cursor-offset* *doc-lines*) *doc-cursor-offset*)
+    (buffer-setup (nth *doc-cursor-offset* *doc-lines*))
     (when (< (- *doc-cursor-offset* *doc-view-offset*) 0)
       (doc-scroll-up))
+    (doc-update-cursor)
     (app-repaint)))
     
 
@@ -55,29 +62,38 @@
   (format t "doc-cursor-down~%")
   (when (< *doc-cursor-offset* *doc-num-lines*)
     (incf *doc-cursor-offset*)
-    (buffer-setup (nth *doc-cursor-offset* *doc-lines*) *doc-cursor-offset*)
+    (buffer-setup (nth *doc-cursor-offset* *doc-lines*))
     (when (> (- *doc-cursor-offset* *doc-view-offset*) *doc-view-height*)
       (doc-scroll-down))
+    (doc-update-cursor)
     (app-repaint)))
 
 (defun doc-cursor-left ()
-  (buffer-cursor-left))
+  (buffer-cursor-left)
+  (doc-update-cursor))
+
 
 (defun doc-cursor-right ()
-  (buffer-cursor-right))
+  (buffer-cursor-right)
+  (doc-update-cursor))
+      
 
 (defun doc-backspace ()
   (buffer-backspace)
-  (doc-update-line *buffer-doc-pos* *buffer-line*)
+  (doc-update-line *doc-cursor-offset* *buffer-line*)
+  (doc-update-cursor)
   (app-repaint))
 
 (defun doc-text (text)
   (buffer-append text)
-  (doc-update-line *buffer-doc-pos* *buffer-line*)
+  (doc-update-line *doc-cursor-offset* *buffer-line*)
+  (doc-update-cursor)
   (app-repaint))
 
 (defun doc-return ()
-  (buffer-return))
+  (buffer-return)
+  (doc-update-cursor))
+
 
 (defun doc-draw ()
   
