@@ -91,9 +91,14 @@
   (app-repaint))
 
 (defun doc-return ()
-  (buffer-return)
-  (doc-update-cursor))
-
+  (log-wr :info "doc-return")
+  (let ((new-line (buffer-split-line-at-cursor)))
+    (doc-update-line *doc-cursor-offset* *buffer-line*)
+    (setf *doc-lines* (insert-at *doc-lines* (1+ *doc-cursor-offset*) new-line)
+	  *doc-view-starts-at* (nthcdr *doc-view-offset* *doc-lines*))
+    (incf *doc-cursor-offset*)
+    (doc-update-cursor)
+    (app-repaint)))
 
 (defun doc-draw ()
   

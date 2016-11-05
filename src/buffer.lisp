@@ -55,22 +55,30 @@
 	  *buffer-last-insert-pos* *buffer-cursor-pos*)
     (app-repaint)))
 
-#|
-TODO: finish this ...
+
 (defun buffer-split-line-at-cursor ()
   (cond
-    ((= *buffer-cursor-pos* 0) ... ) ;; at start of line
-    ((= *buffer-cursor-pos* (length *buffer-line*)) ... ) ;; at end of line
-    ( t ;; in middle of line
-     (when (> (length thing) 0)
-       (let ((pre-cursor (subseq *buffer-line* 0 *buffer-cursor-pos*))
+    
+    ;; at start of line
+    ((= *buffer-cursor-pos* 0)
+     (let ((old-line *buffer-line*))
+       (setf *buffer-line* ""
+	     *buffer-cursor-pos* 0)
+       old-line))
+    
+    ;; at end of line
+    ((= *buffer-cursor-pos* (length *buffer-line*))
+     (setf *buffer-cursor-pos* 0)
+     "")
+    
+    ;; in middle of line
+    (t 
+       (let ((pre-cursor  (subseq *buffer-line* 0 *buffer-cursor-pos*))
 	     (post-cursor (subseq *buffer-line* *buffer-cursor-pos* (length *buffer-line*))))
-	 
-	 (setf *buffer-line* (format nil "~a~a~a" pre-cursor thing post-cursor)
-	       *buffer-cursor-pos* (1+ *buffer-cursor-pos*)))
-       
-  )
-     |#
+
+	 (setf *buffer-line* pre-cursor
+	       *buffer-cursor-pos* 0)
+	 post-cursor))))
 
 ;;(defun buffer-return ()
 ;;  (format t "newline~%")

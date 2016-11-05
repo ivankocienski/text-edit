@@ -5,6 +5,7 @@
   :serial t
   :depends-on (sdl2 sdl2-ttf)
   :components ((:file "src/package")
+	       (:file "src/support")
 	       (:file "src/log")
 	       (:file "src/font")
 	       (:file "src/repaint")
