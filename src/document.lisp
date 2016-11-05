@@ -47,13 +47,20 @@
     (setf *doc-view-starts-at* (nthcdr *doc-view-offset* *doc-lines*))
     (app-repaint)))
 
+(defun doc-adjust-view-for-cursor ()
+  ;; do it this way so we can adjust all the places!
+  (when (< (- *doc-cursor-offset* *doc-view-offset*) 0)
+    (doc-scroll-up))
+  (when (> (- *doc-cursor-offset* *doc-view-offset*) *doc-view-height*)
+    (doc-scroll-down))
+  )
+
 (defun doc-cursor-up ()
   (format t "doc-cursor-up~%")
   (when (> *doc-cursor-offset* 0)
     (decf *doc-cursor-offset*)
     (buffer-setup (nth *doc-cursor-offset* *doc-lines*))
-    (when (< (- *doc-cursor-offset* *doc-view-offset*) 0)
-      (doc-scroll-up))
+    (doc-adjust-view-for-cursor)
     (doc-update-cursor)
     (app-repaint)))
     
@@ -63,18 +70,25 @@
   (when (< *doc-cursor-offset* *doc-num-lines*)
     (incf *doc-cursor-offset*)
     (buffer-setup (nth *doc-cursor-offset* *doc-lines*))
-    (when (> (- *doc-cursor-offset* *doc-view-offset*) *doc-view-height*)
-      (doc-scroll-down))
+    (doc-adjust-view-for-cursor)
     (doc-update-cursor)
     (app-repaint)))
 
 (defun doc-cursor-left ()
-  (buffer-cursor-left)
+  (if (buffer-cursor-at-start?)
+      (progn
+	(doc-cursor-up)
+	(buffer-cursor-go-end))
+      (buffer-cursor-left))
   (doc-update-cursor))
 
 
 (defun doc-cursor-right ()
-  (buffer-cursor-right)
+  (if (buffer-cursor-at-end?)
+      (progn
+	(doc-cursor-down)
+	(buffer-cursor-go-home))
+      (buffer-cursor-right))
   (doc-update-cursor))
       
 

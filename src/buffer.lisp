@@ -13,12 +13,27 @@
 				  *buffer-cursor-pos*))))
 			      
 
+(defun buffer-cursor-at-start? ()
+  (zerop *buffer-cursor-pos*))
+
+(defun buffer-cursor-at-end? ()
+  (= *buffer-cursor-pos* (length *buffer-line*)))
+
+(defun buffer-cursor-go-home ()
+  (setf *buffer-cursor-pos* 0
+	*buffer-last-insert-pos* 0))
+
+(defun buffer-cursor-go-end ()
+  (let ((len (length *buffer-line*)))
+    (setf *buffer-cursor-pos* len
+	  *buffer-last-insert-pos* len)))
+
 (defun buffer-backspace ()
   (format t "backspace~%")
 
   (cond
     ;; at end of line
-    ((= *buffer-cursor-pos* (length *buffer-line*))
+    ((buffer-cursor-at-end?)
      (let ((newlen (1- (length *buffer-line*))))
        (when (> newlen -1)
 	 (setf *buffer-line* (subseq *buffer-line* 0 newlen)
@@ -63,12 +78,14 @@
     ((= *buffer-cursor-pos* 0)
      (let ((old-line *buffer-line*))
        (setf *buffer-line* ""
-	     *buffer-cursor-pos* 0)
+	     *buffer-cursor-pos* 0
+	     *buffer-last-insert-pos* 0)
        old-line))
     
     ;; at end of line
     ((= *buffer-cursor-pos* (length *buffer-line*))
-     (setf *buffer-cursor-pos* 0)
+     (setf *buffer-cursor-pos* 0
+	   *buffer-last-insert-pos* 0)
      "")
     
     ;; in middle of line
@@ -77,7 +94,8 @@
 	     (post-cursor (subseq *buffer-line* *buffer-cursor-pos* (length *buffer-line*))))
 
 	 (setf *buffer-line* pre-cursor
-	       *buffer-cursor-pos* 0)
+	       *buffer-cursor-pos* 0
+	       *buffer-last-insert-pos* 0)
 	 post-cursor))))
 
 ;;(defun buffer-return ()
