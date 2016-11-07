@@ -50,7 +50,7 @@
 				    g
 				    b)))))
 
-(defun font-draw-string (x y str)
+(defun font-draw-string (x y str &optional inverse)
   "draw string in loaded font"
   
   (let ((destination-rect (sdl2:make-rect x
@@ -58,13 +58,24 @@
 				    9
 				    16)))
 
+    (when inverse
+      (sdl2:set-render-draw-color *font-renderer*
+				  100
+				  100
+				  100
+				  255))
     (loop for ch across str
        do (progn
 	    (let ((tex (aref *font-textures* (char-code ch))))
+	      (when inverse
+		(sdl2:render-fill-rect *font-renderer*
+				       destination-rect))
+	      
 	      (when tex
+		
 		(sdl2:render-copy *font-renderer*
 				  tex
-				  :dest-rect destination-rect)
-		(incf (sdl2:rect-x destination-rect)
-		      (sdl2:texture-width tex))))))))
+				  :dest-rect destination-rect))
+	      (incf (sdl2:rect-x destination-rect)
+		    (sdl2:texture-width tex)))))))
 
