@@ -84,6 +84,7 @@
 		   
 		   (app-when-repaint ()
 		     ;;(paint)
+		     
 		     (sdl2:set-render-draw-color renderer 0 0 0 255)
 		     (sdl2:render-clear renderer)
 		     

@@ -55,20 +55,28 @@
     (doc-scroll-down))
   )
 
-(defun doc-cursor-up ()
+(defun doc-cursor-up (&optional (line-count 1))
   (format t "doc-cursor-up~%")
+  
   (when (> *doc-cursor-offset* 0)
-    (decf *doc-cursor-offset*)
+    (decf *doc-cursor-offset* line-count)
+    (when (< *doc-cursor-offset* 0)
+      (setf *doc-cursor-offset* 0))
+    
     (buffer-setup (nth *doc-cursor-offset* *doc-lines*))
     (doc-adjust-view-for-cursor)
     (doc-update-cursor)
     (app-repaint)))
     
 
-(defun doc-cursor-down ()
+(defun doc-cursor-down (&optional (line-count 1))
   (format t "doc-cursor-down~%")
+  
   (when (< *doc-cursor-offset* *doc-num-lines*)
-    (incf *doc-cursor-offset*)
+    (incf *doc-cursor-offset* line-count)
+    (when (>= *doc-cursor-offset* *doc-num-lines*)
+      (setf *doc-cursor-offset* *doc-num-lines*))
+    
     (buffer-setup (nth *doc-cursor-offset* *doc-lines*))
     (doc-adjust-view-for-cursor)
     (doc-update-cursor)
