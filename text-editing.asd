@@ -12,6 +12,7 @@
 	       (:file "src/timer")
 	       (:file "src/cursor")
 	       (:file "src/buffer")
+	       (:file "src/select")
 	       (:file "src/document")
 	       (:file "src/text-edit")))
 

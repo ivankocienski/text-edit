@@ -50,32 +50,38 @@
 				    g
 				    b)))))
 
-(defun font-draw-string (x y str &optional inverse)
+(defun font-draw-string (x y str &optional highlight)
   "draw string in loaded font"
   
-  (let ((destination-rect (sdl2:make-rect x
-				    y
-				    9
-				    16)))
+  (let* ((destination-rect (sdl2:make-rect x
+					   y
+					   9
+					   16))
+	 (highlight (or highlight '(-1 . -1)))
+	 (hl-start (car highlight))
+	 (hl-end   (cdr highlight))
+	 (str (if (> (length str) 0)
+		  str
+		  (if (> hl-end -1) " " str))))
 
-    (when inverse
-      (sdl2:set-render-draw-color *font-renderer*
-				  100
-				  100
-				  100
-				  255))
-    (loop for ch across str
-       do (progn
-	    (let ((tex (aref *font-textures* (char-code ch))))
-	      (when inverse
-		(sdl2:render-fill-rect *font-renderer*
-				       destination-rect))
-	      
-	      (when tex
+    (sdl2:set-render-draw-color *font-renderer*
+				100
+				100
+				100
+				255)
+      
+      (loop for ch across str
+	 for i from 0
+	 do (let ((tex (aref *font-textures* (char-code ch))))
+		(when (< hl-start i hl-end)
+		  (sdl2:render-fill-rect *font-renderer*
+					 destination-rect))
 		
-		(sdl2:render-copy *font-renderer*
-				  tex
-				  :dest-rect destination-rect))
-	      (incf (sdl2:rect-x destination-rect)
-		    (sdl2:texture-width tex)))))))
+		(when tex		  
+		  (sdl2:render-copy *font-renderer*
+				    tex
+				    :dest-rect destination-rect))
+		
+		(incf (sdl2:rect-x destination-rect)
+		      (sdl2:texture-width tex))))))
 

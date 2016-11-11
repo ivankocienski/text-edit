@@ -3,22 +3,28 @@
 (defconstant +XRES+ 800)
 (defconstant +YRES+ 600)
 
-(defun init ()
-  )
+(defun init (renderer)
+  (doc-init)
+  (doc-load (asdf:system-relative-pathname 'text-edit "data/palwarp.c"))
+  
+  (timer-reset-all)
+  (font-init renderer)
+  (cursor-init renderer)
+  
+  (app-repaint))
 
-(defun paint ()
-  )
+(defun paint (renderer)
+  (app-when-repaint ()
+    
+    (sdl2:set-render-draw-color renderer 0 0 0 255)
+    (sdl2:render-clear renderer)
+    
+    (font-color 255 255 255)
+    (sdl2:set-render-draw-color renderer 255 255 255 255)
+    (doc-draw)
 
-
-(defun key-down (sym unicode mod)
-  (case sym
-    (:sdl-key-return    (buffer-newline))
-    (:sdl-key-backspace (buffer-backspace))
-    (:sdl-key-left      (buffer-cursor-left))
-    (:sdl-key-right     (buffer-cursor-right))
-    (:sdl-key-up        (doc-cursor-up))
-    (:sdl-key-down      (doc-cursor-down))
-    (t (buffer-append unicode))))
+    (cursor-draw)
+    (sdl2:render-present renderer)))
 
 (defmacro on-key-do ((key-var) &body forms)
   (let* ((key-value-var (gensym "key-value-var"))
@@ -30,6 +36,20 @@
 
     `(let ((,key-value-var (sdl2:scancode-value ,key-var)))
        (cond ,@cond-forms))))
+
+(defun key-down (sym)
+  (on-key-do (sym)
+    (:scancode-left      (doc-cursor-left))
+    (:scancode-right     (doc-cursor-right))
+    (:scancode-down      (doc-cursor-down))
+    (:scancode-up        (doc-cursor-up))
+    (:scancode-backspace (doc-backspace))
+    (:scancode-return    (doc-return))
+    (:scancode-lshift    (select-start))
+    (:scancode-rshift    (select-start))
+    (:scancode-escape    (select-clear))
+    (:scancode-delete    (doc-delete))))
+
 
 (defun main ()
   "entry point. run this."
@@ -44,17 +64,9 @@
 			      :title "SDL window"
 			      :flags '(:shown))
 
-
       (sdl2:with-renderer (renderer window)
 
-	(doc-init)
-	(doc-load (asdf:system-relative-pathname 'text-edit "data/palwarp.c"))
-	
-	(timer-reset-all)
-	(font-init renderer)
-	(cursor-init renderer)
-	
-	(app-repaint)
+	(init renderer)
 	(log-wr :info "entering main loop")
 
 	(let ((last-time (sdl2:get-ticks)))
@@ -65,14 +77,7 @@
 			)
 	    
 	    (:keydown (:keysym sym)
-		      ;;(log-wr "keydown sym=~d" sym)
-		      (on-key-do (sym)
-			(:scancode-left      (doc-cursor-left))
-			(:scancode-right     (doc-cursor-right))
-			(:scancode-down      (doc-cursor-down))
-			(:scancode-up        (doc-cursor-up))
-			(:scancode-backspace (doc-backspace))
-			(:scancode-return    (doc-return))))
+		      (key-down sym))
 	    
 	    (:quit ()
 		   t)
@@ -81,19 +86,8 @@
 		   (let ((time-now (sdl2:get-ticks)))
 		     (timer-tick-all (* (- time-now last-time) 0.001))
 		     (setf last-time time-now))
-		   
-		   (app-when-repaint ()
-		     ;;(paint)
-		     
-		     (sdl2:set-render-draw-color renderer 0 0 0 255)
-		     (sdl2:render-clear renderer)
-		     
-		     (font-color 255 255 255)
-		     (sdl2:set-render-draw-color renderer 255 255 255 255)
-		     (doc-draw)
 
-		     (cursor-draw)
-		     (sdl2:render-present renderer)))
+		   (paint renderer))
 	    
 	    ))))))
 
