@@ -1,33 +1,16 @@
 (in-package :text-edit)
 
-;; height of all
-(defparameter *doc-view-height* 35
-  "The number of lines drawn on the screen")
-
 (defparameter *doc-lines* nil
   "Actual document lines as loaded from file")
-(defparameter *doc-num-lines* 0
-  "Number of lines in document")
 
-(defparameter *doc-cursor-offset* 0
-  "Position of line number of cursor in document")
-
-(defparameter *doc-view-starts-at* nil
-  "the top (pointer) of the current view window in the document for drawing")
-(defparameter *doc-view-offset* 0
-  "line number of the top of the view window")
-
-
-;; i should *really* re-factor this.
 
 (defun doc-init ()
-  (setf *doc-cursor-offset* 0
-	*doc-view-offset* 0)
+;;  (setf *doc-cursor-offset* 0
+;;	*doc-view-offset* 0)
   )
 
-(defun doc-update-cursor ()
-  (cursor-set-pos *buffer-cursor-pos*
-		  *doc-cursor-offset*))
+(defun doc-length ()
+  (length *doc-lines*))
 
 (defun doc-load (path)
   (log-wr :info "doc-load: path=~a" path)
@@ -48,99 +31,12 @@
 (defun doc-update-line (pos line)
   (setf (nth pos *doc-lines*) line))
 
-;;(defun doc-scroll-up ()
-  ;;(format t "doc-scroll-up~%")
-  
-;;  (when (> *doc-view-offset* 0)
-;;    (decf *doc-view-offset*)
-;;    (setf *doc-view-starts-at* (nthcdr *doc-view-offset* *doc-lines*))))
+(defun doc-setup-cursor-line (cursor-line-number)
+  (buffer-setup (nth cursor-line-number *doc-lines*)))
 
-(defun doc-scroll-down ()
-  ;;(format t "doc-scroll-down~%")
-  (when (< *doc-view-offset* *doc-num-lines*)
-    (incf *doc-view-offset*)
-    (setf *doc-view-starts-at* (nthcdr *doc-view-offset* *doc-lines*))))
-
-(defun doc-adjust-view-for-cursor ()
-  ;; do it this way so we can adjust all the places!
-  
-  ;;(when (< (- *doc-cursor-offset* *doc-view-offset*) 0)
-  ;;  (doc-scroll-up))
-
-  (let ((top-offset (- *doc-cursor-offset* *doc-view-offset*)))
-    (cond
-      ((< top-offset 0)
-       (incf *doc-view-offset* top-offset)
-       (setf *doc-view-starts-at* (nthcdr *doc-view-offset* *doc-lines*)))
-
-      ((> top-offset *doc-view-height*)
-       (incf *doc-view-offset* (- top-offset *doc-view-height*))
-       (setf *doc-view-starts-at* (nthcdr *doc-view-offset* *doc-lines*))))))
-    
-  
-;;  (when (> (- *doc-cursor-offset* *doc-view-offset*) *doc-view-height*)
-;;    (doc-scroll-down)))
-
-(defun doc-cursor-up (&optional (line-count 1))
-  (format t "doc-cursor-up~%")
-  
-  (when (> *doc-cursor-offset* 0)
-    (decf *doc-cursor-offset* line-count)
-    (when (< *doc-cursor-offset* 0)
-      (setf *doc-cursor-offset* 0))
-
-    (if (select-active?)
-	(select-update)
-	(select-clear))
-    
-    (buffer-setup (nth *doc-cursor-offset* *doc-lines*))
-    (doc-adjust-view-for-cursor)
-    (doc-update-cursor)
-    (app-repaint)))
-    
-
-(defun doc-cursor-down (&optional (line-count 1))
-  (format t "doc-cursor-down~%")
-  
-  (when (< *doc-cursor-offset* *doc-num-lines*)
-    (incf *doc-cursor-offset* line-count)
-    (when (>= *doc-cursor-offset* *doc-num-lines*)
-      (setf *doc-cursor-offset* *doc-num-lines*))
-
-    (if (select-active?)
-	(select-update)
-	(select-clear))
-
-    (buffer-setup (nth *doc-cursor-offset* *doc-lines*))
-    (doc-adjust-view-for-cursor)
-    (doc-update-cursor)
-    (app-repaint)))
-
-(defun doc-cursor-left ()
-  (if (buffer-cursor-at-start?)
-      (progn
-	(doc-cursor-up)
-	(buffer-cursor-go-end))
-      (buffer-cursor-left))
-  
-  (doc-update-cursor)
-  
-  (if (select-active?)
-      (select-update)
-      (select-clear)))
-
-(defun doc-cursor-right ()
-  (if (buffer-cursor-at-end?)
-      (progn
-	(doc-cursor-down)
-	(buffer-cursor-go-home))
-      (buffer-cursor-right))
-  
-  (doc-update-cursor)
-
-  (if (select-active?)
-      (select-update)
-      (select-clear)))
+(defun doc-valid-line? (cursor-line)
+  (and (>= cursor-line 0)
+       (< cursor-line (doc-length))))
 
 (defun doc-backspace ()
   (buffer-backspace)
@@ -168,6 +64,8 @@
 		 (end-line-pos   (select-current-end-line))
 		 (start-line (nth start-line-pos *doc-lines*))
 		 (end-line   (nth end-line-pos   *doc-lines*)))
+
+	    (format t "multi-line start-pos=~d  end-pos=~d~%" start-line-pos end-line-pos)
 	    
 	    (multiple-value-bind (start-cut start-remaining)
 		(string-snip start-line
@@ -183,6 +81,9 @@
 
 		(declare (ignore end-cut))
 
+		(format t "start-remaining=~s~%" start-remaining)
+		(format t "  end-remaining=~s~%" end-remaining)
+		
 		(let ((doc-head (subseq *doc-lines* 0 start-line-pos))
 		      (doc-tail (subseq *doc-lines* end-line-pos (length *doc-lines*))))
 
@@ -214,17 +115,4 @@
     (doc-update-cursor)
     (app-repaint)))
 
-(defun doc-draw ()
   
-  (loop for line in *doc-view-starts-at*
-     and ypos from 0 by 16
-     and line-no from *doc-view-offset* by 1
-     and lines-to-draw from *doc-view-height* above -1
-     ;;do (log-wr :debug "line-no=~d" line-no)
-     do (font-draw-string 0
-			  ypos
-			  line
-			  (select-highlight-for-line line-no))))
-  
-  ;;(cursor-draw-block *buffer-cursor-pos*
-;;		     (- *doc-cursor-offset* *doc-view-offset*)))

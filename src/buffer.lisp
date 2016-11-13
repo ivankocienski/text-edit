@@ -1,32 +1,42 @@
 (in-package :text-edit)
 
 (defparameter *buffer-line* nil)
-(defparameter *buffer-cursor-pos* 0)
-(defparameter *buffer-last-insert-pos* 0)
+;;(defparameter *buffer-cursor-pos* 0)
+;;(defparameter *buffer-last-insert-pos* 0)
 
 (defun buffer-setup (from-line)
-  (setf *buffer-line* from-line
-	*buffer-cursor-pos* *buffer-last-insert-pos*
-	*buffer-cursor-pos* (let ((line-len (length from-line)))
-			      (if (> *buffer-cursor-pos* line-len)
-				  line-len
-				  *buffer-cursor-pos*))))
+  (setf *buffer-line* from-line))
+
+;;	*buffer-cursor-pos* *buffer-last-insert-pos*
+;;	*buffer-cursor-pos* (let ((line-len (length from-line)))
+;;			      (if (> *buffer-cursor-pos* line-len)
+;;				  line-len
+;;				  *buffer-cursor-pos*))))
 			      
 
-(defun buffer-cursor-at-start? ()
-  (zerop *buffer-cursor-pos*))
+(defun buffer-length ()
+  (length *buffer-line*))
 
-(defun buffer-cursor-at-end? ()
-  (= *buffer-cursor-pos* (length *buffer-line*)))
+(defun buffer-cursor-at-start? (pos)
+  (<= pos 0))
 
-(defun buffer-cursor-go-home ()
-  (setf *buffer-cursor-pos* 0
-	*buffer-last-insert-pos* 0))
+(defun buffer-cursor-at-end? (pos)
+  (>= pos (length *buffer-line*)))
 
-(defun buffer-cursor-go-end ()
-  (let ((len (length *buffer-line*)))
-    (setf *buffer-cursor-pos* len
-	  *buffer-last-insert-pos* len)))
+;;(defun buffer-char-before-start? (pos)
+;;  (< pos 0))
+
+;;(defun buffer-char-after-end? (pos)
+;;  (>= pos (buffer-length)))
+
+;;(defun buffer-cursor-go-home ()
+;;  (setf *buffer-cursor-pos* 0
+;;	*buffer-last-insert-pos* 0))
+
+;;(defun buffer-cursor-go-end ()
+;;  (let ((len (length *buffer-line*)))
+;;    (setf *buffer-cursor-pos* len
+;;	  *buffer-last-insert-pos* len)))
 
 (defun buffer-backspace ()
   (format t "backspace~%")
@@ -56,53 +66,32 @@
 
   
 
-(defun buffer-cursor-left ()
-  (format t "buffer-cursor-left~%")
-  (when (> *buffer-cursor-pos* 0)
-    (setf *buffer-cursor-pos* (1- *buffer-cursor-pos*)
-	  *buffer-last-insert-pos* *buffer-cursor-pos*)
-    (app-repaint)))
+;;(defun buffer-cursor-left ()
+;;  (format t "buffer-cursor-left~%")
+;;  (when (> *buffer-cursor-pos* 0)
+;;    (setf *buffer-cursor-pos* (1- *buffer-cursor-pos*)
+;;	  *buffer-last-insert-pos* *buffer-cursor-pos*)
+;;    (app-repaint)))
 
-(defun buffer-cursor-right ()
-  (format t "buffer-cursor-right~%")
-  (when (< *buffer-cursor-pos* (length *buffer-line*))
-    (setf *buffer-cursor-pos* (1+ *buffer-cursor-pos*)
-	  *buffer-last-insert-pos* *buffer-cursor-pos*)
-    (app-repaint)))
+;;(defun buffer-cursor-right ()
+;;  (format t "buffer-cursor-right~%")
+;;  (when (< *buffer-cursor-pos* (length *buffer-line*))
+;;    (setf *buffer-cursor-pos* (1+ *buffer-cursor-pos*)
+;;	  *buffer-last-insert-pos* *buffer-cursor-pos*)
+;;    (app-repaint)))
 
 (defun buffer-cut-line (start-pos end-pos)
 
-  (cond
-    ;; ignore stupid inputs
-    ((>= start-pos end-pos)
-     nil)
-    
-    ;; from first character to end-pos
-    ((= start-pos -1)
-     (let ((chomped (subseq *buffer-line* 0 end-pos))
-	   (kept    (subseq *buffer-line* end-pos (length *buffer-line*))))
+  (multiple-value-bind (remaining cut) (string-snip *buffer-line* start-pos end-pos)
+    (setf *buffer-line* remaining)
+    cut))
 
-       (setf *buffer-line* kept)
-       (values *buffer-line* chomped)))
+(defun buffer-split-line-at (pos)
 
-    ;; from start-pos to end of line
-    ((>= end-pos (length *buffer-line*))
-     (let ((kept    (subseq *buffer-line* 0 start-pos))
-	   (chomped (subseq *buffer-line* start-pos end-pos)))
-       
-       (setf *buffer-line* kept)
-       (values *buffer-line* chomped)))
-      
-    ;; from start-pos to end-pos
-    (t
-     (let ((keep-head (subseq *buffer-line* 0 start-pos))
-	   (keep-tail (subseq *buffer-line* end-pos (length *buffer-line*)))
-	   (chomped   (subseq *buffer-line* start-pos end-pos)))
-       
-       (setf *buffer-line* (format nil "~a~a" keep-head keep-tail))
-       (values *buffer-line* chomped)))))
-
-(defun buffer-split-line-at-cursor ()
+  #|
+  (buffer-cut-line *buffer-cursor-pos* (length *buffer-line*))
+  |#
+  
   (cond
     
     ;; at start of line

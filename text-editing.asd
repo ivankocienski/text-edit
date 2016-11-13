@@ -10,6 +10,7 @@
 	       (:file "src/font")
 	       (:file "src/repaint")
 	       (:file "src/timer")
+	       (:file "src/view")
 	       (:file "src/cursor")
 	       (:file "src/buffer")
 	       (:file "src/select")
