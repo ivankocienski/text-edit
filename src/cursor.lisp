@@ -2,25 +2,17 @@
 
 (defparameter *cursor-width* 9)
 (defparameter *cursor-height* 16)
-;;(defparameter *cursor-x* 0)
-;;(defparameter *cursor-y* 0)
 (defparameter *cursor-on* nil)
 (defparameter *cursor-renderer* nil)
 
 (defconstant +CURSOR-GO-UP+    -1)
 (defconstant +CURSOR-GO-DOWN+   1)
-;;(defconstant +CURSOR-GO-LEFT+  -1)
-;;(defconstant +CURSOR-GO-RIGHT+  1)
 
 (defstruct cursor
   (line-number 0 )
   (char-number 0))
 
 (defparameter *current-cursor* nil)
-
-;;(defun cursor-set-pos (x y)
-;;  (setf *cursor-x* x
-;;	*cursor-y* y))
 
 (defmacro cursor-current-line-number ()
   `(cursor-line-number *current-cursor*))
@@ -32,7 +24,6 @@
   (setf *cursor-renderer* renderer
 	*current-cursor* (make-cursor))
   
-  (cursor-set-pos 0 0)
   (with-timer (:cursor-blink 0.5)
     (setf *cursor-on* (not *cursor-on*))
     (app-repaint)))
@@ -60,16 +51,6 @@
 ;;
 
 
-;;(defparameter *cursor-doc-pos* 0
-;;  "position of cursor in document")
-;;(defparameter *cursor-line-pos* 0
-;;  "position of cursor on current line")
-
-;;(defun doc-update-cursor ()
-;;  (cursor-set-pos *buffer-cursor-pos*
-;;		  *doc-cursor-offset*))
-
-    
 (defun cursor-move-vertical (delta)
   (log-wr :info "cursor-move-vertical delta=~d" delta)
 
@@ -112,49 +93,3 @@
 	(app-repaint))))
 
   
-
-#|
-(defun cursor-go-down ()
-  (log-wr :info "cursor-go-down")
-  
-  (when (< *doc-cursor-offset* *doc-num-lines*)
-    (incf *doc-cursor-offset* line-count)
-    (when (>= *doc-cursor-offset* *doc-num-lines*)
-      (setf *doc-cursor-offset* *doc-num-lines*))
-
-    (if (select-active?)
-	(select-update)
-	(select-clear))
-
-    (buffer-setup (nth *doc-cursor-offset* *doc-lines*))
-    (doc-adjust-view-for-cursor)
-    (doc-update-cursor)
-    (app-repaint)))
-|#
-
-;;(defun cursor-go-left ()
-;;   (if (buffer-cursor-at-start?)
-;;      (progn
-;;	(doc-cursor-up)
-;;	(buffer-cursor-go-end))
-;;      (buffer-cursor-left))
-  
-;;  (doc-update-cursor)
-  
-;;  (if (select-active?)
-;;      (select-update)
-;;      (select-clear)))
-
-;;(defun cursor-go-right ()
-;;    (if (buffer-cursor-at-end?)
-;;      (progn
-;;	(doc-cursor-down)
-;;	(buffer-cursor-go-home))
-;;      (buffer-cursor-right))
-  
-;;  (doc-update-cursor)
-
-;;  (if (select-active?)
-;;      (select-update)
-;;      (select-clear)))
-

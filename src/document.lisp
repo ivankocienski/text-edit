@@ -5,8 +5,6 @@
 
 
 (defun doc-init ()
-;;  (setf *doc-cursor-offset* 0
-;;	*doc-view-offset* 0)
   )
 
 (defun doc-length ()
