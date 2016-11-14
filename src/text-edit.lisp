@@ -20,8 +20,6 @@
     (sdl2:render-clear renderer)
     
     (font-color 255 255 255)
-    (sdl2:set-render-draw-color renderer 255 255 255 255)
-    
     (view-draw *doc-lines*)
 
     (cursor-draw)
@@ -44,12 +42,12 @@
     (:scancode-right     (cursor-move-right))
     (:scancode-down      (cursor-move-vertical +CURSOR-GO-DOWN+))
     (:scancode-up        (cursor-move-vertical +CURSOR-GO-UP+))
-    (:scancode-backspace (doc-backspace))
-    (:scancode-return    (doc-return))
+    (:scancode-backspace (cursor-backspace))
+    (:scancode-return    (cursor-newline))
     (:scancode-lshift    (select-start))
     (:scancode-rshift    (select-start))
     (:scancode-escape    (select-clear))
-    (:scancode-delete    (doc-delete))))
+    (:scancode-delete    (cursor-delete))))
 
 
 (defun main ()
@@ -74,7 +72,7 @@
 	  (sdl2:with-event-loop (:method :poll)
 	    (:textinput (:text code-point)
 			;;(log-wr :debug "text='~a'" text)
-			(doc-text (string (code-char code-point)))
+			(cursor-insert-text (string (code-char code-point)))
 			)
 	    
 	    (:keydown (:keysym sym)

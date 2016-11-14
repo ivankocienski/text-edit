@@ -36,81 +36,27 @@
   (and (>= cursor-line 0)
        (< cursor-line (doc-length))))
 
-(defun doc-backspace ()
-  (buffer-backspace)
-  (select-clear)
-  (doc-update-line *doc-cursor-offset* *buffer-line*)
-  (doc-update-cursor)
-  (app-repaint))
+(defun doc-backspace (cursor-line cursor-pos)
+  (buffer-backspace cursor-pos)
+  (doc-update-line cursor-line *buffer-line*))
 
-(defun doc-delete ()
+;;(defun doc-delete ()
+;;  )
 
-  (if (select-active?)
+(defun doc-insert-text (line pos text)
+  (buffer-append pos text)
+  (doc-update-line line *buffer-line*))
 
-      ;; do a 'cut'
-      (if (select-single-line?)
-	  (multiple-value-bind (cut-text remaining)
-	      (buffer-cut-line (select-current-start-char)
-			       (select-current-end-char))
-	    
-	    (declare (ignore cut-text))
-	    (doc-update-line *doc-cursor-offset* remaining)
-	    (app-repaint))
+(defun doc-insert-lines (pos lines)
+  (setf *doc-lines* (insert-at *doc-lines* pos lines)))
 
-	  ;; multi-line cut
-	  (let* ((start-line-pos (select-current-start-line))
-		 (end-line-pos   (select-current-end-line))
-		 (start-line (nth start-line-pos *doc-lines*))
-		 (end-line   (nth end-line-pos   *doc-lines*)))
+(defun doc-split-to-end (line pos)
+  (let ((remains (buffer-cut-line pos (buffer-length))))
+    (doc-update-line line *buffer-line*)
+    remains))
 
-	    (format t "multi-line start-pos=~d  end-pos=~d~%" start-line-pos end-line-pos)
-	    
-	    (multiple-value-bind (start-cut start-remaining)
-		(string-snip start-line
-			     (select-current-start-char)
-			     (length start-line))
-
-	      (declare (ignore start-cut))
-		       
-	      (multiple-value-bind (end-cut end-remaining)
-		  (string-snip end-line
-			       -1
-			       (select-current-end-char))
-
-		(declare (ignore end-cut))
-
-		(format t "start-remaining=~s~%" start-remaining)
-		(format t "  end-remaining=~s~%" end-remaining)
-		
-		(let ((doc-head (subseq *doc-lines* 0 start-line-pos))
-		      (doc-tail (subseq *doc-lines* end-line-pos (length *doc-lines*))))
-
-		  (setf *doc-lines* (append doc-head
-					    (list (format nil "~a~a" start-remaining end-remaining))
-					    doc-tail)))
-		(app-repaint)))))
-
-      ;; do a delete char right
-      (progn
-	(doc-cursor-right)
-	(doc-backspace))))
-
-(defun doc-text (text)
-  (buffer-append text)
-  (select-clear)
-  (doc-update-line *doc-cursor-offset* *buffer-line*)
-  (doc-update-cursor)
-  (app-repaint))
-
-(defun doc-return ()
-  (log-wr :info "doc-return")
-  (let ((new-line (buffer-split-line-at-cursor)))
-    (doc-update-line *doc-cursor-offset* *buffer-line*)
-    (setf *doc-lines* (insert-at *doc-lines* (1+ *doc-cursor-offset*) new-line)
-	  *doc-view-starts-at* (nthcdr *doc-view-offset* *doc-lines*))
-    (incf *doc-cursor-offset*)
-    (select-clear)
-    (doc-update-cursor)
-    (app-repaint)))
-
+(defun doc-split-to-start (line pos)
+  (let ((remains (buffer-cut-line 0 pos)))
+    (doc-update-line line *buffer-line*)
+    remains))
   

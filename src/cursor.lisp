@@ -61,10 +61,6 @@
 
       (view-adjust-for-cursor-line new-line-number)
       
-      ;;(if (select-active?)
-      ;;	(select-update)
-      ;;	(select-clear))
-      
       (doc-setup-cursor-line new-line-number)
       
       (app-repaint))))
@@ -92,4 +88,36 @@
 	(incf (cursor-current-char-number))
 	(app-repaint))))
 
+(defun cursor-insert-text (text)
+  (doc-insert-text (cursor-current-line-number)
+		   (cursor-current-char-number)
+		   text)
+  (incf (cursor-current-char-number))
+  ;;(select-clear)
+  (app-repaint))
+
+(defun cursor-backspace ()
+  (unless (buffer-cursor-at-start? (cursor-current-char-number))
+    (doc-backspace (cursor-current-line-number)
+		   (cursor-current-char-number))
   
+    (decf (cursor-curret-char-number))
+    (app-repaint)))
+
+(defun cursor-delete ()
+
+  (unless (buffer-cursor-at-end? (cursor-current-char-number))
+    (doc-backspace (cursor-current-line-number)
+		   (1+ (cursor-current-char-number)))
+  
+    (app-repaint)))
+
+
+(defun cursor-newline ()
+  (log-wr :info "cursor-newline")
+  (let ((new-line (doc-split-to-end (cursor-current-line-number)
+				    (cursor-current-char-number))))
+    
+    (doc-insert-lines (cursor-current-line-number) new-line)
+    (cursor-move-vertical +CURSOR-GO-DOWN+)))
+
