@@ -106,7 +106,7 @@
   (if (buffer-cursor-at-end? (cursor-current-char-number))
       (progn
 	(cursor-move-vertical +CURSOR-GO-DOWN+)
-	(setf (cursor-current-char-number) (buffer-length)))
+	(setf (cursor-current-char-number) 0))
       (progn
 	(incf (cursor-current-char-number))
 	(app-repaint))))
