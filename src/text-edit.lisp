@@ -21,7 +21,8 @@
     
     (font-color 255 255 255)
     (sdl2:set-render-draw-color renderer 255 255 255 255)
-    (doc-draw)
+    
+    (view-draw *doc-lines*)
 
     (cursor-draw)
     (sdl2:render-present renderer)))
@@ -39,8 +40,8 @@
 
 (defun key-down (sym)
   (on-key-do (sym)
-    (:scancode-left      (cursor-go-left))
-    (:scancode-right     (cursor-go-right))
+    (:scancode-left      (cursor-move-left))
+    (:scancode-right     (cursor-move-right))
     (:scancode-down      (cursor-move-vertical +CURSOR-GO-DOWN+))
     (:scancode-up        (cursor-move-vertical +CURSOR-GO-UP+))
     (:scancode-backspace (doc-backspace))

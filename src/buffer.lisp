@@ -1,18 +1,9 @@
 (in-package :text-edit)
 
 (defparameter *buffer-line* nil)
-;;(defparameter *buffer-cursor-pos* 0)
-;;(defparameter *buffer-last-insert-pos* 0)
 
 (defun buffer-setup (from-line)
   (setf *buffer-line* from-line))
-
-;;	*buffer-cursor-pos* *buffer-last-insert-pos*
-;;	*buffer-cursor-pos* (let ((line-len (length from-line)))
-;;			      (if (> *buffer-cursor-pos* line-len)
-;;				  line-len
-;;				  *buffer-cursor-pos*))))
-			      
 
 (defun buffer-length ()
   (length *buffer-line*))
@@ -22,21 +13,6 @@
 
 (defun buffer-cursor-at-end? (pos)
   (>= pos (length *buffer-line*)))
-
-;;(defun buffer-char-before-start? (pos)
-;;  (< pos 0))
-
-;;(defun buffer-char-after-end? (pos)
-;;  (>= pos (buffer-length)))
-
-;;(defun buffer-cursor-go-home ()
-;;  (setf *buffer-cursor-pos* 0
-;;	*buffer-last-insert-pos* 0))
-
-;;(defun buffer-cursor-go-end ()
-;;  (let ((len (length *buffer-line*)))
-;;    (setf *buffer-cursor-pos* len
-;;	  *buffer-last-insert-pos* len)))
 
 (defun buffer-backspace ()
   (format t "backspace~%")
@@ -62,23 +38,6 @@
 
     ;; TODO: at beginning of line 
     (t nil)))
-
-
-  
-
-;;(defun buffer-cursor-left ()
-;;  (format t "buffer-cursor-left~%")
-;;  (when (> *buffer-cursor-pos* 0)
-;;    (setf *buffer-cursor-pos* (1- *buffer-cursor-pos*)
-;;	  *buffer-last-insert-pos* *buffer-cursor-pos*)
-;;    (app-repaint)))
-
-;;(defun buffer-cursor-right ()
-;;  (format t "buffer-cursor-right~%")
-;;  (when (< *buffer-cursor-pos* (length *buffer-line*))
-;;    (setf *buffer-cursor-pos* (1+ *buffer-cursor-pos*)
-;;	  *buffer-last-insert-pos* *buffer-cursor-pos*)
-;;    (app-repaint)))
 
 (defun buffer-cut-line (start-pos end-pos)
 
@@ -118,10 +77,6 @@
 	       *buffer-last-insert-pos* 0)
 	 post-cursor))))
 
-;;(defun buffer-return ()
-;;  (format t "newline~%")
-;;  )
-
 (defun buffer-append (thing)
   (format t "buffer-append~%")
   (when (> (length thing) 0)
@@ -133,6 +88,3 @@
 	      *buffer-last-insert-pos* *buffer-cursor-pos*))
       ))
 
-;;(defun buffer-draw ()
-;;  (font-draw-string 10 10 (format nil "~a" *line-buffer*))
-;;  (cursor-draw-block *cursor-pos* 0))

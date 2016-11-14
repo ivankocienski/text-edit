@@ -2,17 +2,36 @@
 
 (defparameter *cursor-width* 9)
 (defparameter *cursor-height* 16)
-(defparameter *cursor-x* 0)
-(defparameter *cursor-y* 0)
+;;(defparameter *cursor-x* 0)
+;;(defparameter *cursor-y* 0)
 (defparameter *cursor-on* nil)
 (defparameter *cursor-renderer* nil)
 
-(defun cursor-set-pos (x y)
-  (setf *cursor-x* x
-	*cursor-y* y))
+(defconstant +CURSOR-GO-UP+    -1)
+(defconstant +CURSOR-GO-DOWN+   1)
+;;(defconstant +CURSOR-GO-LEFT+  -1)
+;;(defconstant +CURSOR-GO-RIGHT+  1)
+
+(defstruct cursor
+  (line-number 0 )
+  (char-number 0))
+
+(defparameter *current-cursor* nil)
+
+;;(defun cursor-set-pos (x y)
+;;  (setf *cursor-x* x
+;;	*cursor-y* y))
+
+(defmacro cursor-current-line-number ()
+  `(cursor-line-number *current-cursor*))
+
+(defmacro cursor-current-char-number ()
+  `(cursor-char-number *current-cursor*))
 
 (defun cursor-init (renderer)
-  (setf *cursor-renderer* renderer)
+  (setf *cursor-renderer* renderer
+	*current-cursor* (make-cursor))
+  
   (cursor-set-pos 0 0)
   (with-timer (:cursor-blink 0.5)
     (setf *cursor-on* (not *cursor-on*))
@@ -20,8 +39,10 @@
 
 (defun cursor-draw ()
   (when *cursor-on*
-    (let ((rect (sdl2:make-rect (* *cursor-x* *cursor-width*)
-				(* *cursor-y* *cursor-height*)
+    (let ((rect (sdl2:make-rect (* (cursor-current-char-number) *cursor-width*)
+				(* (- (cursor-current-line-number)
+				      *view-starts-at-pos*)
+				   *cursor-height*)
 				*cursor-width*
 				*cursor-height*)))
 
@@ -38,16 +59,6 @@
 ;; editing
 ;;
 
-(defconstant +CURSOR-GO-UP+    -1)
-(defconstant +CURSOR-GO-DOWN+   1)
-(defconstant +CURSOR-GO-LEFT+  -1)
-(defconstant +CURSOR-GO-RIGHT+  1)
-
-(defstruct cursor
-  (line-number 0 )
-  (char-number 0))
-
-(defparameter *current-cursor* nil)
 
 ;;(defparameter *cursor-doc-pos* 0
 ;;  "position of cursor in document")
@@ -58,11 +69,6 @@
 ;;  (cursor-set-pos *buffer-cursor-pos*
 ;;		  *doc-cursor-offset*))
 
-(defmacro cursor-current-line-number ()
-  `(cursor-line-number *current-cursor*))
-
-(defmacro cursor-current-char-number ()
-  `(cursor-char-number *current-cursor*))
     
 (defun cursor-move-vertical (delta)
   (log-wr :info "cursor-move-vertical delta=~d" delta)
@@ -99,10 +105,10 @@
   
   (if (buffer-cursor-at-end? (cursor-current-char-number))
       (progn
-	(cursor-move-vertical +CURSOR-GO-UP+)
+	(cursor-move-vertical +CURSOR-GO-DOWN+)
 	(setf (cursor-current-char-number) (buffer-length)))
       (progn
-	(decf (cursor-current-char-number))
+	(incf (cursor-current-char-number))
 	(app-repaint))))
 
   
@@ -126,33 +132,29 @@
     (app-repaint)))
 |#
 
-(defun cursor-go-left ()
-   (if (buffer-cursor-at-start?)
-      (progn
-	(doc-cursor-up)
-	(buffer-cursor-go-end))
-      (buffer-cursor-left))
+;;(defun cursor-go-left ()
+;;   (if (buffer-cursor-at-start?)
+;;      (progn
+;;	(doc-cursor-up)
+;;	(buffer-cursor-go-end))
+;;      (buffer-cursor-left))
   
-  (doc-update-cursor)
+;;  (doc-update-cursor)
   
-  (if (select-active?)
-      (select-update)
-      (select-clear)))
+;;  (if (select-active?)
+;;      (select-update)
+;;      (select-clear)))
 
-(defun cursor-go-right ()
-    (if (buffer-cursor-at-end?)
-      (progn
-	(doc-cursor-down)
-	(buffer-cursor-go-home))
-      (buffer-cursor-right))
+;;(defun cursor-go-right ()
+;;    (if (buffer-cursor-at-end?)
+;;      (progn
+;;	(doc-cursor-down)
+;;	(buffer-cursor-go-home))
+;;      (buffer-cursor-right))
   
-  (doc-update-cursor)
+;;  (doc-update-cursor)
 
-  (if (select-active?)
-      (select-update)
-      (select-clear)))
+;;  (if (select-active?)
+;;      (select-update)
+;;      (select-clear)))
 
-;;(defun doc-cursor-up (&optional (line-count 1))
-;;(defun doc-cursor-down (&optional (line-count 1))
-;;(defun doc-cursor-left ()
-;;(defun doc-cursor-right ()
