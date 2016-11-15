@@ -9,8 +9,9 @@
 (defconstant +CURSOR-GO-DOWN+   1)
 
 (defstruct cursor
-  (line-number 0 )
-  (char-number 0))
+  (line-number 0)
+  (char-number 0)
+  (char-last-number 0))
 
 (defparameter *current-cursor* nil)
 
@@ -20,6 +21,15 @@
 (defmacro cursor-current-char-number ()
   `(cursor-char-number *current-cursor*))
 
+(defun cursor-set-current-char-number (pos)
+  (setf (cursor-current-char-number) pos
+	(cursor-char-last-number *current-cursor*) pos))
+
+(defun cursor-inc-current-char-number (delta)
+  (let ((new-pos (incf (cursor-current-char-number) delta)))
+    (setf (cursor-char-last-number *current-cursor*) new-pos)))
+
+  
 (defun cursor-init (renderer)
   (setf *cursor-renderer* renderer
 	*current-cursor* (make-cursor))
@@ -50,6 +60,13 @@
 ;; editing
 ;;
 
+(defun cursor-move-home ()
+  (setf (cursor-current-char-number) 0)
+  (app-repaint))
+
+(defun cursor-move-end ()
+  (setf (cursor-current-char-number) (buffer-length))
+  (app-repaint))
 
 (defun cursor-move-vertical (delta)
   (log-wr :info "cursor-move-vertical delta=~d" delta)
@@ -62,6 +79,12 @@
       (view-adjust-for-cursor-line new-line-number)
       
       (doc-setup-cursor-line new-line-number)
+
+      (let ((char-num (cursor-char-last-number *current-cursor*))
+	    (buflen (buffer-length)))
+
+	(setf (cursor-current-char-number)      	
+	      (if (< buflen char-num) buflen char-num)))
       
       (app-repaint))))
 
@@ -71,9 +94,9 @@
   (if (buffer-cursor-at-start? (cursor-current-char-number))
       (progn
 	(cursor-move-vertical +CURSOR-GO-UP+)
-	(setf (cursor-current-char-number) (buffer-length)))
+	(cursor-move-end))
       (progn
-	(decf (cursor-current-char-number))
+	(cursor-inc-current-char-number -1)
 	(app-repaint))))
 
 
@@ -83,24 +106,18 @@
   (if (buffer-cursor-at-end? (cursor-current-char-number))
       (progn
 	(cursor-move-vertical +CURSOR-GO-DOWN+)
-	(setf (cursor-current-char-number) 0))
+	(cursor-move-home))
       (progn
-	(incf (cursor-current-char-number))
+	(cursor-inc-current-char-number 1)
 	(app-repaint))))
 
-(defun cursor-move-home ()
-  (setf (cursor-current-char-number) 0)
-  (app-repaint))
-
-(defun cursor-move-end ()
-  (setf (cursor-current-char-number) (buffer-length))
-  (app-repaint))
 
 (defun cursor-insert-text (text)
   (doc-insert-text (cursor-current-line-number)
 		   (cursor-current-char-number)
 		   text)
-  (incf (cursor-current-char-number))
+  (cursor-inc-current-char-number 1)
+  
   ;;(select-clear)
   (app-repaint))
 
@@ -123,7 +140,7 @@
 	(doc-backspace (cursor-current-line-number)
 		       (cursor-current-char-number))
 	
-	(decf (cursor-current-char-number))
+	(cursor-inc-current-char-number -1)
 	(app-repaint))))
 
 (defun cursor-delete ()
@@ -143,7 +160,6 @@
       ;; else
       (progn
 	
-
 	(doc-backspace (cursor-current-line-number)
 		       (1+ (cursor-current-char-number)))
 	
