@@ -1,6 +1,6 @@
 (in-package :text-edit)
 
-(defparameter *view-window-height* 35)
+(defparameter *view-window-height* 35
   "The number of lines drawn on the screen")
 
 (defparameter *view-starts-at-pos* 0

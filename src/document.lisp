@@ -19,10 +19,7 @@
 		   (cons line (read-line-to-doc))))))
 
       (setf *doc-lines* (read-line-to-doc))))
-  (setf *doc-num-lines* (length *doc-lines*)
-	*doc-view-starts-at* *doc-lines*)
   (buffer-setup (first *doc-lines*))
-  (doc-update-cursor)
   (log-wr :info "lines=~d" (length *doc-lines*)))
 
 

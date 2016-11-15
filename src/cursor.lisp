@@ -101,7 +101,7 @@
     (doc-backspace (cursor-current-line-number)
 		   (cursor-current-char-number))
   
-    (decf (cursor-curret-char-number))
+    (decf (cursor-current-char-number))
     (app-repaint)))
 
 (defun cursor-delete ()

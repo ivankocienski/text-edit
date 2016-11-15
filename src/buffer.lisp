@@ -15,8 +15,20 @@
   (>= pos (length *buffer-line*)))
 
 (defun buffer-backspace (cursor-pos)
-  (format t "backspace~%")
+  (unless (buffer-cursor-at-start? cursor-pos)
 
+    (setf *buffer-line*
+	  (string-snip *buffer-line* (1- cursor-pos) cursor-pos))))
+
+(defun buffer-append (pos text)
+  (setf *buffer-line*
+	(format nil "~a~a~a"
+		(subseq *buffer-line* 0 pos)
+		text
+		(subseq *buffer-line* pos (buffer-length)))))
+
+    
+#|    
   (cond
     ;; at end of line
     ((buffer-cursor-at-end? cursor-pos)
@@ -38,6 +50,7 @@
 
     ;; TODO: at beginning of line 
     (t nil)))
+|#
 
 (defun buffer-cut-line (start-pos end-pos)
 
