@@ -47,7 +47,9 @@
     (:scancode-lshift    (select-start))
     (:scancode-rshift    (select-start))
     (:scancode-escape    (select-clear))
-    (:scancode-delete    (cursor-delete))))
+    (:scancode-delete    (cursor-delete))
+    (:scancode-home      (cursor-move-home))
+    (:scancode-end       (cursor-move-end))))
 
 
 (defun main ()

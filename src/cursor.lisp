@@ -88,6 +88,14 @@
 	(incf (cursor-current-char-number))
 	(app-repaint))))
 
+(defun cursor-move-home ()
+  (setf (cursor-current-char-number) 0)
+  (app-repaint))
+
+(defun cursor-move-end ()
+  (setf (cursor-current-char-number) (buffer-length))
+  (app-repaint))
+
 (defun cursor-insert-text (text)
   (doc-insert-text (cursor-current-line-number)
 		   (cursor-current-char-number)
@@ -118,6 +126,7 @@
   (let ((new-line (doc-split-to-end (cursor-current-line-number)
 				    (cursor-current-char-number))))
     
-    (doc-insert-lines (cursor-current-line-number) new-line)
-    (cursor-move-vertical +CURSOR-GO-DOWN+)))
+    (doc-insert-lines (1+ (cursor-current-line-number)) new-line)    
+    (cursor-move-vertical +CURSOR-GO-DOWN+)
+    (cursor-move-home)))
 
