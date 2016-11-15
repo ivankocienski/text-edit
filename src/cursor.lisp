@@ -105,20 +105,49 @@
   (app-repaint))
 
 (defun cursor-backspace ()
-  (unless (buffer-cursor-at-start? (cursor-current-char-number))
-    (doc-backspace (cursor-current-line-number)
-		   (cursor-current-char-number))
-  
-    (decf (cursor-current-char-number))
-    (app-repaint)))
+  (if (buffer-cursor-at-start? (cursor-current-char-number))
+      (when (> (cursor-current-line-number) 0)
+	(let ((line (first (let ((pos (cursor-current-line-number)))
+			     (doc-cut-lines pos (1+ pos))))))
+	  (decf (cursor-current-line-number))
+	  (doc-setup-cursor-line (cursor-current-line-number))
+	  (cursor-move-end)
+	  (doc-insert-text (cursor-current-line-number)
+			   (buffer-length)
+			   line)
+	  (app-repaint)))
+
+      ;; else
+      (progn
+	
+	(doc-backspace (cursor-current-line-number)
+		       (cursor-current-char-number))
+	
+	(decf (cursor-current-char-number))
+	(app-repaint))))
 
 (defun cursor-delete ()
 
-  (unless (buffer-cursor-at-end? (cursor-current-char-number))
-    (doc-backspace (cursor-current-line-number)
-		   (1+ (cursor-current-char-number)))
-  
-    (app-repaint)))
+  (if (buffer-cursor-at-end? (cursor-current-char-number))
+      (when (< (cursor-current-line-number) (doc-length))
+
+	(let ((line (let ((pos (1+ (cursor-current-line-number))))
+		      (first
+		       (doc-cut-lines pos (1+ pos))))))
+	  
+	  (doc-insert-text (cursor-current-line-number)
+			   (buffer-length)
+			   line)
+	  (app-repaint)))
+
+      ;; else
+      (progn
+	
+
+	(doc-backspace (cursor-current-line-number)
+		       (1+ (cursor-current-char-number)))
+	
+	(app-repaint))))
 
 
 (defun cursor-newline ()

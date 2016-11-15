@@ -47,6 +47,14 @@
 (defun doc-insert-lines (pos lines)
   (setf *doc-lines* (insert-at *doc-lines* pos lines)))
 
+(defun doc-cut-lines (start end)
+  (let ((head  (subseq *doc-lines* 0 start))
+	(chunk (subseq *doc-lines* start end))
+	(tail  (subseq *doc-lines* end (doc-length))))
+
+    (setf *doc-lines* (append head tail))
+    chunk))
+
 (defun doc-split-to-end (line pos)
   (let ((remains (buffer-cut-line pos (buffer-length))))
     (doc-update-line line *buffer-line*)
