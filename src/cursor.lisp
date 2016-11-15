@@ -54,6 +54,10 @@
 				  255)
       (sdl2:render-fill-rect *cursor-renderer* rect))))
 
+(defun cursor-update-select ()
+  (if (select-active?)
+      (select-update *current-cursor*)))
+
 ;; oops
 
 ;;
@@ -62,10 +66,12 @@
 
 (defun cursor-move-home ()
   (setf (cursor-current-char-number) 0)
+  (cursor-update-select)
   (app-repaint))
 
 (defun cursor-move-end ()
   (setf (cursor-current-char-number) (buffer-length))
+  (cursor-update-select)
   (app-repaint))
 
 (defun cursor-move-vertical (delta)
@@ -86,6 +92,7 @@
 	(setf (cursor-current-char-number)      	
 	      (if (< buflen char-num) buflen char-num)))
       
+      (cursor-update-select)
       (app-repaint))))
 
 (defun cursor-move-left ()
@@ -97,7 +104,10 @@
 	(cursor-move-end))
       (progn
 	(cursor-inc-current-char-number -1)
-	(app-repaint))))
+	(app-repaint)))
+  
+  (cursor-update-select))
+
 
 
 (defun cursor-move-right ()
@@ -109,19 +119,23 @@
 	(cursor-move-home))
       (progn
 	(cursor-inc-current-char-number 1)
-	(app-repaint))))
+	(app-repaint)))
+  
+  (cursor-update-select))
 
 
-(defun cursor-insert-text (text)
+
+(defun cursor-insert-text (text)  
   (doc-insert-text (cursor-current-line-number)
 		   (cursor-current-char-number)
 		   text)
   (cursor-inc-current-char-number 1)
-  
-  ;;(select-clear)
-  (app-repaint))
 
-(defun cursor-backspace ()
+  (app-repaint)
+  (select-finish))
+
+
+(defun cursor-backspace ()  
   (if (buffer-cursor-at-start? (cursor-current-char-number))
       (when (> (cursor-current-line-number) 0)
 	(let ((line (first (let ((pos (cursor-current-line-number)))
@@ -141,7 +155,10 @@
 		       (cursor-current-char-number))
 	
 	(cursor-inc-current-char-number -1)
-	(app-repaint))))
+	(app-repaint)))
+
+  (select-finish))
+
 
 (defun cursor-delete ()
 
@@ -163,8 +180,16 @@
 	(doc-backspace (cursor-current-line-number)
 		       (1+ (cursor-current-char-number)))
 	
-	(app-repaint))))
+	(app-repaint)))
 
+  (select-finish))
+
+(defun cursor-select-begin ()
+  (select-begin *current-cursor*))
+
+(defun cursor-select-finish ()
+  (select-finish)
+  (app-repaint))
 
 (defun cursor-newline ()
   (log-wr :info "cursor-newline")
@@ -173,5 +198,7 @@
     
     (doc-insert-lines (1+ (cursor-current-line-number)) new-line)    
     (cursor-move-vertical +CURSOR-GO-DOWN+)
-    (cursor-move-home)))
+    (cursor-move-home))
+  (select-finish))
+
 

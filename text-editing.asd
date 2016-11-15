@@ -11,9 +11,9 @@
 	       (:file "src/repaint")
 	       (:file "src/timer")
 	       (:file "src/view")
-	       (:file "src/cursor")
 	       (:file "src/buffer")
-	       (:file "src/select")
 	       (:file "src/document")
+	       (:file "src/cursor")
+	       (:file "src/select")
 	       (:file "src/text-edit")))
 
