@@ -3,9 +3,13 @@
 (defconstant +XRES+ 800)
 (defconstant +YRES+ 600)
 
+(defparameter *mod-shift* nil)
+
 (defun init (renderer)
   (doc-init)
   (doc-load (asdf:system-relative-pathname 'text-edit "data/palwarp.c"))
+
+  (setf *mod-shift* nil)
   
   (timer-reset-all)
   (font-init renderer)
@@ -38,19 +42,23 @@
 
 (defun key-down (sym)
   (on-key-do (sym)
-    (:scancode-left      (cursor-move-left))
-    (:scancode-right     (cursor-move-right))
-    (:scancode-down      (cursor-move-vertical +CURSOR-GO-DOWN+))
-    (:scancode-up        (cursor-move-vertical +CURSOR-GO-UP+))
+    (:scancode-left      (cursor-move-left  *mod-shift*))
+    (:scancode-right     (cursor-move-right *mod-shift*))
+    (:scancode-down      (cursor-move-vertical +CURSOR-GO-DOWN+ *mod-shift*))
+    (:scancode-up        (cursor-move-vertical +CURSOR-GO-UP+   *mod-shift*))
     (:scancode-backspace (cursor-backspace))
     (:scancode-return    (cursor-newline))
-    (:scancode-lshift    (cursor-select-begin))
-    (:scancode-rshift    (cursor-select-begin))
+    (:scancode-lshift    (setf *mod-shift* t) (cursor-select-begin))
+    (:scancode-rshift    (setf *mod-shift* t) (cursor-select-begin))
     (:scancode-escape    (cursor-select-finish))
     (:scancode-delete    (cursor-delete))
-    (:scancode-home      (cursor-move-home))
-    (:scancode-end       (cursor-move-end))))
+    (:scancode-home      (cursor-move-home *mod-shift*))
+    (:scancode-end       (cursor-move-end  *mod-shift*))))
 
+(defun key-up (sym)
+  (on-key-do (sym)
+    (:scancode-lshift (setf *mod-shift* nil))
+    (:scancode-rshift (setf *mod-shift* nil))))
 
 (defun main ()
   "entry point. run this."
@@ -77,8 +85,8 @@
 			(cursor-insert-text (string (code-char code-point)))
 			)
 	    
-	    (:keydown (:keysym sym)
-		      (key-down sym))
+	    (:keydown (:keysym sym) (key-down sym))
+	    (:keyup   (:keysym sym) (key-up   sym))
 	    
 	    (:quit ()
 		   t)

@@ -54,9 +54,12 @@
 				  255)
       (sdl2:render-fill-rect *cursor-renderer* rect))))
 
-(defun cursor-update-select ()
-  (if (select-active?)
-      (select-update *current-cursor*)))
+(defun cursor-update-select (mod-shift)
+  (if mod-shift
+      (if (select-active?)
+	  (select-update *current-cursor*))
+      
+      (select-finish)))
 
 ;; oops
 
@@ -64,17 +67,17 @@
 ;; editing
 ;;
 
-(defun cursor-move-home ()
+(defun cursor-move-home (mod-shift)
   (setf (cursor-current-char-number) 0)
-  (cursor-update-select)
+  (cursor-update-select mod-shift)
   (app-repaint))
 
-(defun cursor-move-end ()
+(defun cursor-move-end (mod-shift)
   (setf (cursor-current-char-number) (buffer-length))
-  (cursor-update-select)
+  (cursor-update-select mod-shift)
   (app-repaint))
 
-(defun cursor-move-vertical (delta)
+(defun cursor-move-vertical (delta mod-shift)
   (log-wr :info "cursor-move-vertical delta=~d" delta)
 
   (let ((new-line-number (+ (cursor-current-line-number) delta)))
@@ -92,36 +95,36 @@
 	(setf (cursor-current-char-number)      	
 	      (if (< buflen char-num) buflen char-num)))
       
-      (cursor-update-select)
+      (cursor-update-select mod-shift)
       (app-repaint))))
 
-(defun cursor-move-left ()
+(defun cursor-move-left (mod-shift)
   (log-wr :info "cursor-move-left")
 
   (if (buffer-cursor-at-start? (cursor-current-char-number))
       (progn
-	(cursor-move-vertical +CURSOR-GO-UP+)
-	(cursor-move-end))
+	(cursor-move-vertical +CURSOR-GO-UP+ mod-shift)
+	(cursor-move-end mod-shift))
       (progn
 	(cursor-inc-current-char-number -1)
 	(app-repaint)))
   
-  (cursor-update-select))
+  (cursor-update-select mod-shift))
 
 
 
-(defun cursor-move-right ()
+(defun cursor-move-right (mod-shift)
   (log-wr :info "cursor-move-right")
   
   (if (buffer-cursor-at-end? (cursor-current-char-number))
       (progn
-	(cursor-move-vertical +CURSOR-GO-DOWN+)
-	(cursor-move-home))
+	(cursor-move-vertical +CURSOR-GO-DOWN+ mod-shift)
+	(cursor-move-home mod-shift))
       (progn
 	(cursor-inc-current-char-number 1)
 	(app-repaint)))
   
-  (cursor-update-select))
+  (cursor-update-select mod-shift))
 
 
 
@@ -185,7 +188,8 @@
   (select-finish))
 
 (defun cursor-select-begin ()
-  (select-begin *current-cursor*))
+  (unless (select-active?)
+    (select-begin *current-cursor*)))
 
 (defun cursor-select-finish ()
   (select-finish)
