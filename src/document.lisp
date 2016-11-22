@@ -55,6 +55,34 @@
     (setf *doc-lines* (append head tail))
     chunk))
 
+(defun doc-delete ()
+  (multiple-value-bind (start end) (select-normalized)
+    (let ((start-char (cursor-char-number start))
+	  (start-line (cursor-line-number start))
+	  (end-char   (cursor-char-number end))
+	  (end-line   (cursor-line-number end)))
+      
+      (if (select-single-line?)
+	  (progn
+	    (buffer-cut-line start-char end-char)
+	    (doc-update-line start-line *buffer-line*))
+
+	  ;; else multi-line
+	  (progn
+	    (doc-setup-cursor-line start-line)
+	    (doc-split-to-end start-line start-char)
+
+	    (doc-setup-cursor-line end-line)
+	    (doc-split-to-start end-line end-char)
+				
+	    (let ((old-end (nth end-line *doc-lines*)))
+				  
+	      (doc-cut-lines (1+ start-line) end-line)
+
+	      (let ((old-start (nth start-line *doc-lines*)))
+		(doc-update-line start-line
+				 (format nil "~a~a" old-start old-end)))))))))
+
 (defun doc-split-to-end (line pos)
   (let ((remains (buffer-cut-line pos (buffer-length))))
     (doc-update-line line *buffer-line*)

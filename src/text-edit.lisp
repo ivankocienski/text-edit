@@ -50,7 +50,7 @@
     (:scancode-return    (cursor-newline))
     (:scancode-lshift    (setf *mod-shift* t) (cursor-select-begin))
     (:scancode-rshift    (setf *mod-shift* t) (cursor-select-begin))
-    (:scancode-escape    (cursor-select-finish))
+    (:scancode-escape    (setf *mod-shift* nil) (cursor-select-finish))
     (:scancode-delete    (cursor-delete))
     (:scancode-home      (cursor-move-home *mod-shift*))
     (:scancode-end       (cursor-move-end  *mod-shift*))))

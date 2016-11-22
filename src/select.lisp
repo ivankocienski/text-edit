@@ -67,11 +67,11 @@
 	(cond
 	  ((= start-line end-line)
 	   (when (= line-no start-line)
-	     (cons (cursor-char-number cur-start)
+	     (cons (1- (cursor-char-number cur-start))
 		   (cursor-char-number cur-end))))
 
 	  ((= start-line line-no)
-	   (cons (cursor-char-number cur-start)
+	   (cons (1- (cursor-char-number cur-start))
 		 1000))
 
 	  ((= end-line line-no)

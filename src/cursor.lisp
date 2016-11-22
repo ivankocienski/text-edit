@@ -165,25 +165,34 @@
 
 (defun cursor-delete ()
 
-  (if (buffer-cursor-at-end? (cursor-current-char-number))
-      (when (< (cursor-current-line-number) (doc-length))
-
-	(let ((line (let ((pos (1+ (cursor-current-line-number))))
-		      (first
-		       (doc-cut-lines pos (1+ pos))))))
-	  
-	  (doc-insert-text (cursor-current-line-number)
-			   (buffer-length)
-			   line)
-	  (app-repaint)))
-
-      ;; else
+  (if (select-active?)
       (progn
-	
-	(doc-backspace (cursor-current-line-number)
-		       (1+ (cursor-current-char-number)))
-	
-	(app-repaint)))
+	(let ((sel-start (select-normalized)))
+	  (doc-delete)
+	  (app-repaint)
+	  (setf (cursor-current-line-number) (cursor-line-number sel-start)
+		(cursor-current-char-number) (cursor-char-number sel-start))))
+    
+      ;; else no selection
+      (if (buffer-cursor-at-end? (cursor-current-char-number))
+	  (when (< (cursor-current-line-number) (doc-length))
+
+	    (let ((line (let ((pos (1+ (cursor-current-line-number))))
+			  (first
+			   (doc-cut-lines pos (1+ pos))))))
+	      
+	      (doc-insert-text (cursor-current-line-number)
+			       (buffer-length)
+			       line)
+	      (app-repaint)))
+
+	  ;; else
+	  (progn
+	    
+	    (doc-backspace (cursor-current-line-number)
+			   (1+ (cursor-current-char-number)))
+	    
+	    (app-repaint))))
 
   (select-finish))
 
