@@ -49,11 +49,21 @@
 
 (defun doc-cut-lines (start end)
   (let ((head  (subseq *doc-lines* 0 start))
-	(chunk (subseq *doc-lines* start end))
-	(tail  (subseq *doc-lines* end (doc-length))))
+	(chunk (subseq *doc-lines* start (1+ end)))
+	(tail  (if (< end (doc-length)) (subseq *doc-lines* (1+ end) (doc-length)))))
 
     (setf *doc-lines* (append head tail))
     chunk))
+
+(defun doc-split-to-end (line pos)
+  (let ((remains (buffer-cut-line pos (buffer-length))))
+    (doc-update-line line *buffer-line*)
+    remains))
+
+(defun doc-split-to-start (line pos)
+  (let ((remains (buffer-cut-line 0 pos)))
+    (doc-update-line line *buffer-line*)
+    remains))
 
 (defun doc-delete ()
   (multiple-value-bind (start end) (select-normalized)
@@ -83,13 +93,4 @@
 		(doc-update-line start-line
 				 (format nil "~a~a" old-start old-end)))))))))
 
-(defun doc-split-to-end (line pos)
-  (let ((remains (buffer-cut-line pos (buffer-length))))
-    (doc-update-line line *buffer-line*)
-    remains))
-
-(defun doc-split-to-start (line pos)
-  (let ((remains (buffer-cut-line 0 pos)))
-    (doc-update-line line *buffer-line*)
-    remains))
   
