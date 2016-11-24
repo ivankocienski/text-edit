@@ -94,3 +94,28 @@
 				 (format nil "~a~a" old-start old-end)))))))))
 
   
+(defun doc-copy ()
+  (multiple-value-bind (start end) (select-normalized)
+    (let ((start-char (cursor-char-number start))
+	  (start-line (cursor-line-number start))
+	  (end-char   (cursor-char-number end))
+	  (end-line   (cursor-line-number end)))
+      
+      (if (select-single-line?)	  
+	  (list (buffer-copy-line start-char end-char))
+	  
+	  ;; else multi-line
+	  (progn
+	    (let ((start-text (buffer-copy-line start-char
+						nil
+						(nth start-line *doc-lines*)))
+		  (end-text (buffer-copy-line nil
+					      end-char
+					      (nth end-line *doc-lines*)))
+		  (mid-text (subseq *doc-lines*
+				    (1+ start-line)
+				    end-line)))
+	     
+	      (append (list start-text)
+		      mid-text
+		      (list end-text))))))))

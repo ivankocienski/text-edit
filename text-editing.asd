@@ -3,13 +3,14 @@
   :author "Ivan K."
   :license ""
   :serial t
-  :depends-on (sdl2 sdl2-ttf)
+  :depends-on (sdl2 sdl2-ttf split-sequence)
   :components ((:file "src/package")
 	       (:file "src/support")
 	       (:file "src/log")
 	       (:file "src/font")
 	       (:file "src/repaint")
 	       (:file "src/timer")
+	       (:file "src/clipboard")
 	       (:file "src/view")
 	       (:file "src/buffer")
 	       (:file "src/document")

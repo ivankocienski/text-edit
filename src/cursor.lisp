@@ -137,28 +137,38 @@
   (app-repaint)
   (select-finish))
 
+(defun cursor-delete-selection ()
+  (let ((sel-start (select-normalized)))
+    (doc-delete)
+    (app-repaint)
+    (setf (cursor-current-line-number) (cursor-line-number sel-start)
+	  (cursor-current-char-number) (cursor-char-number sel-start))))
 
-(defun cursor-backspace ()  
-  (if (buffer-cursor-at-start? (cursor-current-char-number))
-      (when (> (cursor-current-line-number) 0)
-	(let ((line (first (let ((pos (cursor-current-line-number)))
-			     (doc-cut-lines pos (1+ pos))))))
-	  (decf (cursor-current-line-number))
-	  (doc-setup-cursor-line (cursor-current-line-number))
-	  (cursor-move-end)
-	  (doc-insert-text (cursor-current-line-number)
-			   (buffer-length)
-			   line)
-	  (app-repaint)))
+(defun cursor-backspace ()
+  (if (select-active?)
+      (cursor-delete-selection)
 
-      ;; else
-      (progn
-	
-	(doc-backspace (cursor-current-line-number)
-		       (cursor-current-char-number))
-	
-	(cursor-inc-current-char-number -1)
-	(app-repaint)))
+      ;; else regular backspace
+      (if (buffer-cursor-at-start? (cursor-current-char-number))
+	  (when (> (cursor-current-line-number) 0)
+	    (let ((line (first (let ((pos (cursor-current-line-number)))
+				 (doc-cut-lines pos (1+ pos))))))
+	      (decf (cursor-current-line-number))
+	      (doc-setup-cursor-line (cursor-current-line-number))
+	      (cursor-move-end nil)
+	      (doc-insert-text (cursor-current-line-number)
+			       (buffer-length)
+			       line)
+	      (app-repaint)))
+
+	  ;; else
+	  (progn
+	    
+	    (doc-backspace (cursor-current-line-number)
+			   (cursor-current-char-number))
+	    
+	    (cursor-inc-current-char-number -1)
+	    (app-repaint))))
 
   (select-finish))
 
@@ -166,12 +176,7 @@
 (defun cursor-delete ()
 
   (if (select-active?)
-      (progn
-	(let ((sel-start (select-normalized)))
-	  (doc-delete)
-	  (app-repaint)
-	  (setf (cursor-current-line-number) (cursor-line-number sel-start)
-		(cursor-current-char-number) (cursor-char-number sel-start))))
+      (cursor-delete-selection)
     
       ;; else no selection
       (if (buffer-cursor-at-end? (cursor-current-char-number))
@@ -214,4 +219,15 @@
     (cursor-move-home))
   (select-finish))
 
+(defun cursor-copy ()
+  (when (select-active?)
+    (log-wr :info "copy")
+    (let ((doc (doc-copy)))
+      (log-wr :info "~s" doc)
+      (clipboard-set doc)))
+  )
 
+(defun cursor-paste ()
+  (when (clipboard-has-text?)
+    (log-wr :info "paste"))
+  )

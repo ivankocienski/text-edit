@@ -4,12 +4,14 @@
 (defconstant +YRES+ 600)
 
 (defparameter *mod-shift* nil)
+(defparameter *mod-control* nil)
 
 (defun init (renderer)
   (doc-init)
   (doc-load (asdf:system-relative-pathname 'text-edit "data/palwarp.c"))
 
-  (setf *mod-shift* nil)
+  (setf *mod-shift* nil
+	*mod-control* nil)
   
   (timer-reset-all)
   (font-init renderer)
@@ -50,15 +52,23 @@
     (:scancode-return    (cursor-newline))
     (:scancode-lshift    (setf *mod-shift* t) (cursor-select-begin))
     (:scancode-rshift    (setf *mod-shift* t) (cursor-select-begin))
+    (:scancode-lctrl     (setf *mod-control* t))
+    (:scancode-rctrl     (setf *mod-control* t))
     (:scancode-escape    (setf *mod-shift* nil) (cursor-select-finish))
     (:scancode-delete    (cursor-delete))
     (:scancode-home      (cursor-move-home *mod-shift*))
-    (:scancode-end       (cursor-move-end  *mod-shift*))))
+    (:scancode-end       (cursor-move-end  *mod-shift*))
+
+    (:scancode-c (when *mod-control* (cursor-copy)))
+    (:scancode-v (when *mod-control* (cursor-paste)))))
 
 (defun key-up (sym)
   (on-key-do (sym)
     (:scancode-lshift (setf *mod-shift* nil))
-    (:scancode-rshift (setf *mod-shift* nil))))
+    (:scancode-rshift (setf *mod-shift* nil))
+    (:scancode-lctrl  (setf *mod-control* nil))
+    (:scancode-rctrl  (setf *mod-control* nil))))
+    
 
 (defun main ()
   "entry point. run this."
@@ -81,8 +91,9 @@
 	(let ((last-time (sdl2:get-ticks)))
 	  (sdl2:with-event-loop (:method :poll)
 	    (:textinput (:text code-point)
-			;;(log-wr :debug "text='~a'" text)
-			(cursor-insert-text (string (code-char code-point)))
+			(unless *mod-control*
+			  ;;(log-wr :debug "text='~a'" text)
+			  (cursor-insert-text (string (code-char code-point))))
 			)
 	    
 	    (:keydown (:keysym sym) (key-down sym))

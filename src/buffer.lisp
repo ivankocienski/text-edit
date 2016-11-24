@@ -34,3 +34,7 @@
     (setf *buffer-line* remaining)
     cut))
 
+(defun buffer-copy-line (start-char end-char &optional (line *buffer-line*))
+  (let ((start-at (or start-char 0))
+	(end-at   (or end-char (length line))))
+    (subseq line start-at end-at)))
