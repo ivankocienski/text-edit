@@ -229,5 +229,10 @@
 
 (defun cursor-paste ()
   (when (clipboard-has-text?)
-    (log-wr :info "paste"))
+    (log-wr :info "paste")
+    (let ((lines (clipboard-get)))
+      (log-wr :info "~s" lines)
+      (doc-paste (cursor-current-line-number)
+		 (cursor-current-char-number)
+		 lines)))
   )

@@ -26,8 +26,11 @@
 (defun doc-update-line (pos line)
   (setf (nth pos *doc-lines*) line))
 
+(defmacro doc-line (line-no &optional (doc-lines *doc-lines*))
+  `(nth ,line-no ,doc-lines))
+
 (defun doc-setup-cursor-line (cursor-line-number)
-  (buffer-setup (nth cursor-line-number *doc-lines*)))
+  (buffer-setup (doc-line cursor-line-number)))
 
 (defun doc-valid-line? (cursor-line)
   (and (>= cursor-line 0)
@@ -119,3 +122,29 @@
 	      (append (list start-text)
 		      mid-text
 		      (list end-text))))))))
+
+(defun doc-paste (line-pos char-pos lines)
+  (if (= (length lines) 1)
+      
+      ;; single line
+      (buffer-append char-pos (first lines) (doc-line line-pos))
+
+      ;; multi line insert
+      (let ((buffer-post-cursor (let ((cursor-line (doc-line line-pos)))
+				  (buffer-cut-line char-pos
+						   (buffer-length cursor-line)
+						   cursor-line)))
+	    (first-line (first lines))
+	    (rest-lines (rest lines)))
+
+
+	
+	(setf (doc-line line-pos)
+	      (string-cat (doc-line line-pos)
+			  first-line))
+
+	(setf (car (last rest-lines))
+	      (string-cat (car (last rest-lines))
+			  buffer-post-cursor))
+
+	(doc-insert-lines (1+ line-pos) rest-lines))))

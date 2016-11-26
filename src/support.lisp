@@ -43,3 +43,6 @@
        
        (values (format nil "~a~a" keep-head keep-tail)
 	       chomped)))))
+
+(defun string-cat (&rest strings)
+  (format nil "~{~a~}" strings))
