@@ -26,7 +26,7 @@
 (defun doc-update-line (pos line)
   (setf (nth pos *doc-lines*) line))
 
-(defmacro doc-line (line-no &optional (doc-lines *doc-lines*))
+(defmacro doc-line (line-no &optional (doc-lines '*doc-lines*))
   `(nth ,line-no ,doc-lines))
 
 (defun doc-setup-cursor-line (cursor-line-number)
