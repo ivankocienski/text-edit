@@ -1,6 +1,6 @@
 (in-package :text-edit)
 
-(defparameter *view-window-height* 35
+(defparameter *view-window-height* 34
   "The number of lines drawn on the screen")
 
 (defparameter *view-starts-at-pos* 0
@@ -18,6 +18,15 @@
 			    (format nil "~3d ~a" (1+ line-no) line)
 			    (select-highlight-for-line line-no)))))
 
+(defun view-draw-status-line (cursor-char cursor-line filename)
+  (font-draw-string 0
+		    (* (1+ *view-window-height*) 16)
+		    (format nil
+			    "C:~d  L:~d  F:~a"
+			    cursor-char
+			    cursor-line
+			    filename)))
+  
 (defun view-adjust-for-cursor-line (line-number)
   
   (let ((top-offset (- line-number *view-starts-at-pos*)))

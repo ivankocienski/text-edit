@@ -28,6 +28,9 @@
     (font-color 255 255 255)
     (view-draw *doc-lines*)
 
+    (view-draw-status-line (cursor-current-char-number)
+			   (cursor-current-line-number)
+			   "(untitled)")
     (cursor-draw)
     (sdl2:render-present renderer)))
 
