@@ -15,7 +15,10 @@
        and lines-to-draw from *view-window-height* above -1
        do (font-draw-string 0
 			    ypos
-			    (format nil "~3d ~a" (1+ line-no) line)
+			    (format nil "~3d" (1+ line-no)))
+       do (font-draw-string 32
+			    ypos
+			    line
 			    (select-highlight-for-line line-no)))))
 
 (defun view-draw-status-line (cursor-char cursor-line filename)
