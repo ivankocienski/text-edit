@@ -1,6 +1,6 @@
 (in-package :text-edit)
 
-(defparameter *view-window-height* 34
+(defparameter *view-window-height* 35
   "The number of lines drawn on the screen")
 
 (defparameter *view-starts-at-pos* 0
@@ -16,7 +16,7 @@
        do (font-draw-string 0
 			    ypos
 			    (format nil "~3d" (1+ line-no)))
-       do (font-draw-string 32
+       do (font-draw-string 36
 			    ypos
 			    line
 			    (select-highlight-for-line line-no)))))

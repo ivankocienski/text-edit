@@ -124,6 +124,8 @@
 		      (list end-text))))))))
 
 (defun doc-paste (line-pos char-pos lines)
+  (log-wr :info "---- doc-paste ----")
+  
   (if (= (length lines) 1)
       
       ;; single line
@@ -137,14 +139,20 @@
 	    (first-line (first lines))
 	    (rest-lines (rest lines)))
 
+	(log-wr :info "first-line=~a" first-line)
+	(log-wr :info "rest-lines=~s" rest-lines)
 
 	
 	(setf (doc-line line-pos)
 	      (string-cat (doc-line line-pos)
 			  first-line))
 
+	(log-wr "doc-line=~s" (doc-line line-pos))
+	
 	(setf (car (last rest-lines))
 	      (string-cat (car (last rest-lines))
 			  buffer-post-cursor))
+
+	(log-wr :info "rest-lines=~s" rest-lines)
 
 	(doc-insert-lines (1+ line-pos) rest-lines))))
