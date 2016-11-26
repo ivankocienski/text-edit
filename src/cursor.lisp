@@ -40,7 +40,7 @@
 
 (defun cursor-draw ()
   (when *cursor-on*
-    (let ((rect (sdl2:make-rect (* (cursor-current-char-number) *cursor-width*)
+    (let ((rect (sdl2:make-rect (* (+ (cursor-current-char-number) 4) *cursor-width*)
 				(* (- (cursor-current-line-number)
 				      *view-starts-at-pos*)
 				   *cursor-height*)
