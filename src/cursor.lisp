@@ -152,7 +152,7 @@
       (if (buffer-cursor-at-start? (cursor-current-char-number))
 	  (when (> (cursor-current-line-number) 0)
 	    (let ((line (first (let ((pos (cursor-current-line-number)))
-				 (doc-cut-lines pos (1+ pos))))))
+				 (doc-cut-lines pos pos)))))
 	      (decf (cursor-current-line-number))
 	      (doc-setup-cursor-line (cursor-current-line-number))
 	      (cursor-move-end nil)
