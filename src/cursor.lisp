@@ -67,17 +67,17 @@
 ;; editing
 ;;
 
-(defun cursor-move-home (mod-shift)
+(defun cursor-move-home (&optional mod-shift)
   (setf (cursor-current-char-number) 0)
   (cursor-update-select mod-shift)
   (app-repaint))
 
-(defun cursor-move-end (mod-shift)
+(defun cursor-move-end (&optional mod-shift)
   (setf (cursor-current-char-number) (buffer-length))
   (cursor-update-select mod-shift)
   (app-repaint))
 
-(defun cursor-move-vertical (delta mod-shift)
+(defun cursor-move-vertical (delta &optional mod-shift)
   (log-wr :info "cursor-move-vertical delta=~d" delta)
 
   (let ((new-line-number (+ (cursor-current-line-number) delta)))
